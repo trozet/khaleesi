@@ -1,0 +1,3 @@
+---
+- name: Download cirros image
+  get_url: url={{ cirros_image_url }} dest=~/{{ cirros_image_file }} mode=0440
