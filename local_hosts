@@ -1,2 +1,5 @@
+[instack-virt-host]
+hp-dl320g8-17.lab.eng.brq.redhat.com groups=instack-virt-host ansible_ssh_host=hp-dl320g8-17.lab.eng.brq.redhat.com ansible_ssh_user=root
+
 [local]
 localhost ansible_connection=local
