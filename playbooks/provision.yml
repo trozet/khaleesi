@@ -31,6 +31,17 @@
   tags:
     - provision
 
+- name: Get nodes - Foreman
+  hosts: local
+  sudo: no
+  gather_facts: False
+  roles:
+    - { role: get_nodes/foreman,
+              nodes_created: "{{ new_nodes.results }}" }
+              #network_expected: neutron }
+  tags:
+    - provision
+
 - name: Assign floating IP and add hosts - Nova
   hosts: local:&openstack:&nova:!skip_provision
   sudo: no

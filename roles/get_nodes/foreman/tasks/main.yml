@@ -1,0 +1,48 @@
+---
+- name: Provision nodes
+  foreman:
+       foreman_url: "{{ provisioner.foreman_url }}"
+       state: present
+       foreman_username: "{{ provisioner.username }}"
+       foreman_password: "{{ provisioner.password }}"
+       node: "{{ item.value.hostname }}"
+       ipmi_username: "{{ item.value.ipmi_username }}"
+       ipmi_password: "{{ item.value.ipmi_password }}"
+       ipmi_host: "{{ item.value.ipmi_host }}"
+       #key_name: "{{ provisioner.key_name }}"
+       wait_for: "{{ distro.config.initial_boot_timeout }}"
+       config_drive: True
+  register: new_nodes
+  retries: 4
+  delay: 60
+  with_dict: nodes
+
+- local_action:
+    wait_for host={{ item.value.hostname }}
+             port=22 delay=10 timeout=900
+  with_dict: nodes
+
+
+- name: Print host openstack network type (nova/neutron)
+  debug: var=provisioner.network.type
+
+- debug: var=nodes_created
+  when: job.verbosity <= verbosity.debug
+
+- name: Network {{ provisioner.network.type }} == {{ network_expected }} | Add hosts
+  add_host:
+    name="{{ item.0.item.value.hostname }}"
+    groups="{{ item.0.item.value.groups
+        if item.0.item.value.groups is string
+        else item.0.item.value.groups| join(',') }}"
+    ansible_fqdn="{{ item.0.item.value.hostname }}"
+    ansible_ssh_host="{{ item.0.item.value.hostname }}"
+    nodes_created_dict="{{ item.0 }}"
+    floating_ip_dict="{}"
+  with_together:
+    - nodes_created
+
+- debug: var=hostvars
+  when: job.verbosity <= verbosity.debug
+
+

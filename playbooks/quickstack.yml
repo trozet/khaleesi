@@ -1,0 +1,49 @@
+---
+# provison
+#- include: dump_settings.yml
+#determine provisioner and whether or not to skip
+- include: group_by_provision.yml
+
+- include: provision.yml
+- include: group_by.yml tags=provision
+
+#- name: Create tempest node
+#  hosts: local
+#  sudo: yes
+#  roles:
+#    - { role: create_vm_kickstart/create_start_vm }
+
+- name: Wait for hosts
+  hosts: foreman_nodes
+  roles:
+    - { role: wait_for_hosts }
+
+# tempest
+- name: List ip address of tempest node
+  hosts: tempest
+  sudo: yes
+  roles:
+    - { role: tempest/iptables/node_data }
+  tags: tempest_setup
+
+#- name: Ensure iptables is open for tempest
+#  hosts: all:!localhost:!tempest
+#  sudo: yes
+#  roles:
+#    - { role: tempest/iptables }
+#  tags: tempest_setup
+
+- include: tempest.yml
+
+- name: SELINUX error check
+  hosts: all:!localhost:!tempest
+  sudo: yes
+  roles:
+    - { role: selinux_check }
+  tags: provision
+
+- name: clean up
+  hosts: all:!localhost:!tempest
+  sudo: yes
+  roles:
+    - { role: linux/rhsm }
