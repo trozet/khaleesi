@@ -20,6 +20,9 @@ import subprocess
 import requests
 import sys
 import json
+from ast import literal_eval
+from time import sleep
+
 
 DOCUMENTATION = '''
 ---
@@ -27,15 +30,15 @@ module: foreman
 version_added: "0.1"
 short_description: Provision servers via foreman
 description:
-   - Provision servers via foreman
+   - Provision servers via foreman.  If ipmi params are provied then module will use ipmitool directly, else it uses foreman BMC control.
 options:
         foreman_username                = dict(default='admin'),
         foreman_password                = dict(required=True),
         foreman_url                     = dict(default='https://127.0.0.1/api/v2/'),
         node                            = dict(required=True),
         ipmi_username                   = dict(default='root'),
-        ipmi_password                   = dict(required=True),
-        ipmi_host                       = dict(required=True),
+        ipmi_password                   = dict(default=None),
+        ipmi_host                       = dict(default=None),
         key_name                        = dict(default=None),
    foreman_username:
      description:
@@ -99,8 +102,8 @@ def main():
         foreman_url                     = dict(default='https://127.0.0.1/api/v2/'),
         node                            = dict(required=True),
         ipmi_username                   = dict(default='root'),
-        ipmi_password                   = dict(required=True),
-        ipmi_host                       = dict(required=True),
+        ipmi_password                   = dict(default=None),
+        ipmi_host                       = dict(default=None),
         key_name                        = dict(default=None),
         wait                            = dict(default='yes', choices=['yes', 'no']),
         wait_for                        = dict(default=240),
@@ -134,7 +137,44 @@ def main():
     r = s.put(url + 'hosts/%s' % node, data=data, headers=headers)
 
     if r.status_code != 200:
-        module.fail_json(msg=r.json()['message'])
+        #trozet modified this as it needs to index a list first
+        module.fail_json(msg=r.json()[0]['message'])
+    elif ipmi_host is None:
+      reloaded=0
+
+      while reloaded <= 5:
+        data=json.dumps({'power_action': 'status'})
+        r = s.put(url + 'hosts/%s/power' % node, data=data, headers=headers)
+        if r.status_code != requests.codes.ok:
+          foreman_msg='Unable to get power status for node %s' % node
+          module.fail_json(msg=foreman_msg)
+        result= str(r.text)
+        result= literal_eval(result)
+
+        if result['power'] == 'on':
+          if reloaded:
+            print 'Power is back on after reboot'
+            break
+          else:
+            print 'Power is on, rebooting...'
+            data=json.dumps({'power_action': 'reboot'})
+            r = s.put(url + 'hosts/%s/power' % node, data=data, headers=headers)
+        #sometimes servers do not turn back on after ipmi reboot, this is to fix that problem
+        elif result['power'] == 'off':
+          data=json.dumps({'power_action': 'start'})
+          r = s.put(url + 'hosts/%s/power' % node, data=data, headers=headers)
+        else:
+          module.fail_json(msg='Unable to detect state of node')
+        reloaded+=1
+        sleep(10)
+
+      if r.status_code != requests.codes.ok or reloaded > 5:
+        foreman_msg='Rebuild Failed with status code %s after %d tries' % (r.status_code, reloaded)
+        module.fail_json(msg=foreman_msg)
+
+      else:
+        module.exit_json(changed=True, msg="Rebuilding Node")
+
     else:
         ipmi = subprocess.Popen(["ipmitool","-I","lanplus",
                                            "-U",ipmi_username,
