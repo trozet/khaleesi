@@ -6,12 +6,7 @@
        foreman_username: "{{ provisioner.username }}"
        foreman_password: "{{ provisioner.password }}"
        node: "{{ item.value.hostname }}"
-       ipmi_username: "{{ item.value.ipmi_username }}"
-       ipmi_password: "{{ item.value.ipmi_password }}"
-       ipmi_host: "{{ item.value.ipmi_host }}"
-       #key_name: "{{ provisioner.key_name }}"
        wait_for: "{{ distro.config.initial_boot_timeout }}"
-       config_drive: True
   register: new_nodes
   retries: 4
   delay: 60
@@ -19,28 +14,21 @@
 
 - local_action:
     wait_for host={{ item.value.hostname }}
-             port=22 delay=10 timeout=900
+             port=22 delay=10 timeout=1800
   with_dict: nodes
 
+- name: Wait for puppet to complete
+  wait_for:
+         search_regex="^\s*failure\:\s*0$"
+         path=/var/lib/puppet/state/last_run_summary.yaml
+         state=present delay=1200 timeout=2400
+  with_dict: nodes
 
 - name: Print host openstack network type (nova/neutron)
   debug: var=provisioner.network.type
 
 - debug: var=nodes_created
   when: job.verbosity <= verbosity.debug
-
-- name: Network {{ provisioner.network.type }} == {{ network_expected }} | Add hosts
-  add_host:
-    name="{{ item.0.item.value.hostname }}"
-    groups="{{ item.0.item.value.groups
-        if item.0.item.value.groups is string
-        else item.0.item.value.groups| join(',') }}"
-    ansible_fqdn="{{ item.0.item.value.hostname }}"
-    ansible_ssh_host="{{ item.0.item.value.hostname }}"
-    nodes_created_dict="{{ item.0 }}"
-    floating_ip_dict="{}"
-  with_together:
-    - nodes_created
 
 - debug: var=hostvars
   when: job.verbosity <= verbosity.debug
