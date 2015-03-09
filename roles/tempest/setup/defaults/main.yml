@@ -32,7 +32,7 @@ tempest_non_havana_config_generate_command: >
         --debug  --create
         --network-name "public"
         --network-type "flat"
-        --network-physical-label "myphysnet"
+        --network-physical-label "{{ tempest.physnet}}"
         --subnet-cidr "{{ tempest.public_subnet_cidr}}"
         --subnet-gateway  "{{ tempest.public_subnet_gateway }}"
         --subnet-allocation-pool "{{ tempest.public_allocation_start }}" "{{ tempest.public_allocation_end }}"
