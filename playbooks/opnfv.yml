@@ -33,7 +33,7 @@
   gather_facts: True
   sudo: yes
   roles:
-    - { role: foreman/openstack-installer }
+    - { role: foreman/opnfv-install }
     - { role: foreman/hostgroup-params }
   tags:
     - install

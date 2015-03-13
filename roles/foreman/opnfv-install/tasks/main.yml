@@ -1,0 +1,129 @@
+---
+- name: Install DNS Server
+  yum: pkg={{item}} state=present
+  retries: 3
+  delay: 30
+  with_items:
+    - bind
+    - bind-utils
+
+- name: Install dhcpd
+  yum: name=dhcp state=present
+  retries: 3
+  delay: 30
+  register: dhcpd_result
+  until: dhcpd_result.rc == 0
+
+- name: Install augeas
+  yum: name=augeas state=present
+  retries: 3
+  delay: 30
+  register: aug_result
+  until: aug_result.rc == 0
+
+- name: Install Ruby SCL
+  template: src=ruby-scl.repo.j2 dest=/etc/yum.repos.d/ruby-scl.repo owner=root group=root mode=644
+
+- name: Install puppet repo
+  yum: name=http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm state=present
+  retries: 3
+  delay: 30
+  register: pup_result
+
+- name: Install foreman-installer repo rpm
+  yum: name=http://yum.theforeman.org/releases/1.7/el7/x86_64/foreman-release.rpm state=present
+  retries: 3
+  delay: 30
+  register: ofi_result
+  until: ofi_result.rc == 0
+
+- name: Install foreman-installer
+  yum: name=foreman-installer state=present
+  retries: 3
+  delay: 30
+  register: foremani_result
+  until: foremani_result.rc == 0
+
+
+- name: Install OpenStack Puppet Modules
+  yum: name=https://repos.fedorapeople.org/repos/openstack/openstack-juno/epel-7/openstack-puppet-modules-2014.2.8-1.el7.centos.noarch.rpm state=present
+  retries: 3
+  delay: 30
+  register: ofm_result
+  until: ofm_result.rc == 0
+
+- name: Get astapor repo
+  git: repo={{ astapor_repo }}
+       dest={{ astapor_dest }}
+       version={{ astapor_branch }}
+
+- name: Set hostname
+  hostname: name=foreman-server.opnfv.com
+
+- name: Make /etc/hosts proper
+  lineinfile: "dest=/etc/hosts regexp='.*foreman-server.*$' line='{{ hostvars['localhost'].ansible_default_ipv4.address }} foreman-server.opnfv.com foreman-server' state=present"
+
+- name: Deactivate firewalld
+  service: name=firewalld enabled=no state=stopped
+  tags:
+    - firewalld
+
+- name: Make passwords the same for foreman environment
+  replace: >
+    dest={{ astapor_dest }}/bin/seeds.rb
+    regexp='SecureRandom\.hex'
+    replace='"redhat"'
+
+- name: Fix seed values
+  lineinfile: >
+    dest={{ astapor_dest }}/bin/seeds.rb
+    regexp="^(.*\"{{ item.name }}\"[ ]*=> )([\"']){{ item.oldvalue }}([\"']),"
+    line="\1\g<2>{{ item.newvalue }}\g<3>,"
+    backrefs=yes
+    state=present
+  with_items: foreman.seed_values
+
+- name: Remove the prompt in foreman_server.sh
+  lineinfile: >
+    dest={{ astapor_dest }}/bin/foreman_server.sh
+    regexp='^read .*'
+    state=absent
+
+- name: Remove 'include passenger' line from foreman_server.sh
+  lineinfile: >
+    dest={{ astapor_dest }}/bin/foreman_server.sh
+    regexp='^include passenger'
+    state=absent
+
+- name: Run the installer
+  shell: >
+    chdir={{ astapor_dest }}/bin
+    creates=/tmp/foreman_client.sh
+    bash -x ./foreman_server.sh
+  register: installer_run
+  environment:
+    FOREMAN_GATEWAY: "true"
+    FOREMAN_PROVISIONING: "true"
+    PROVISIONING_INTERFACE: "{{ hostvars['localhost'].ansible_default_ipv4.alias }}"
+  tags:
+    - foreman_install
+
+- name: Installer stdout
+  debug: var=installer_run.stdout_lines
+
+- name: Fetch the client installer
+  fetch: src=/tmp/foreman_client.sh dest=/tmp/foreman
+  tags:
+    - fetch_client_script
+
+- name: reset and fetch password
+  command: foreman-rake permissions:reset
+  register: foreman_password_reset
+
+- name: parse password from credentials
+  shell:  'sed -E "s/Reset to user:[ ]?+admin, password:[ ]?+(.*)/\1/" <<< "{{ foreman_password_reset.stdout }}"'
+  register: foreman_parse_password
+
+- name: set foreman admin password as fact
+  set_fact: foreman_admin_password={{foreman_parse_password.stdout }}
+
