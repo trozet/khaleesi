@@ -95,6 +95,12 @@
     regexp='^include passenger'
     state=absent
 
+- name: Check if foreman dir exists and permissions
+  file: path=/usr/share/foreman
+        state=directory
+        mode=0755
+  sudo: yes
+
 - name: Run the installer
   shell: >
     chdir={{ astapor_dest }}/bin
