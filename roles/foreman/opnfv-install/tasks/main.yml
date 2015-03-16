@@ -101,6 +101,29 @@
         mode=0755
   sudo: yes
 
+- name: Create OPNFV modules directory
+  file: path=/usr/share/opnfv/modules
+        state=directory
+        mode=0755
+  sudo: yes
+
+- name: Clone OPNFV modules
+  git:  repo=https://github.com/trozet/puppet-trystack.git
+        dest=/usr/share/opnfv/modules/trystack/
+        clone=yes
+        version=quickstack
+
+- name: Clone OpenDaylight module
+  git:  repo=https://github.com/dfarrell07/puppet-opendaylight.git
+        dest=/usr/share/opnfv/modules/opendaylight/
+        clone=yes
+
+- name: Clone wait for module
+  git:  repo=https://github.com/basti1302/puppet-wait-for.git
+        dest=/usr/share/opnfv/modules/wait-for
+        clone=yes
+
+
 - name: Run the installer
   shell: >
     chdir={{ astapor_dest }}/bin
