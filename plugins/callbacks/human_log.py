@@ -11,7 +11,10 @@ def human_log(res):
     if type(res) == type(dict()):
         for field in FIELDS:
             if field in res.keys():
-                print '\n{0}:\n{1}'.format(field, res[field])
+                try:
+                     print '\n{0}:\n{1}'.format(field, res[field])
+                except UnicodeEncodeError:
+                     print 'Unicode problem, skipping {0}'.format(field)
 
 
 class CallbackModule(object):
