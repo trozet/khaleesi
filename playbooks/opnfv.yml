@@ -34,7 +34,7 @@
   sudo: yes
   roles:
     - { role: foreman/opnfv-install }
-    - { role: foreman/hostgroup-params }
+#    - { role: foreman/hostgroup-params }
   tags:
     - install
 
