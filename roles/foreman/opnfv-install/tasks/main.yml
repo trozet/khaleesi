@@ -156,3 +156,42 @@
 - name: set foreman admin password as fact
   set_fact: foreman_admin_password={{foreman_parse_password.stdout }}
 
+- name: Change Foreman password to "octopus"
+  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} user update --login admin --password octopus
+
+- name: Set new Foreman password as fact
+  set_fact: foreman_admin_password="octopus"
+
+- name: Install hammer plugin
+  yum: name=rubygem-hammer_cli_foreman state=present
+  retries: 3
+  delay: 30
+  register: aug_result
+  until: aug_result.rc == 0
+
+- name: Hammer global parameters
+  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} global-parameter set --name {{item.key}} --value {{item.value}}
+  register: param_result
+  failed_when: (param_result.rc != 0) and (param_result.rc != 65)
+  with_dict: global_params
+
+- name: Create BareMetal Hosts in Foreman
+  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} host create --name {{item.value.short_name}} --hostgroup {{item.value.hostgroup}} 
+           --root-password {{item.value.ansible_ssh_pass}} --managed true --mac {{item.value.mac_address}} 
+           --interface type=Nic::BMC,ip={{item.value.bmc_ip}},mac={{item.value.bmc_mac}},username={{item.value.bmc_user}},password={{item.value.bmc_pass}},provider=IPMI
+  when: ("{{item.value.host_type}}" == 'baremetal') or (hosts_created is defined)
+  with_dict: nodes
+  retries: 3
+  delay: 30
+  register: bare_host_result
+  until: bare_host_result.rc == 0
+  args:
+    creates: /tmp/hostcreate.lock
+
+
+- name: Baremetal Host Create Lock
+  command: touch /tmp/hostcreate.lock
+  args:
+    creates: /tmp/hostcreate.lock
+  when: (bare_host_result is defined) and (bare_host_result.rc == 0)
+
