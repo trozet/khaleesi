@@ -156,18 +156,18 @@
 - name: set foreman admin password as fact
   set_fact: foreman_admin_password={{foreman_parse_password.stdout }}
 
-- name: Change Foreman password to "octopus"
-  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} user update --login admin --password octopus
-
-- name: Set new Foreman password as fact
-  set_fact: foreman_admin_password="octopus"
-
 - name: Install hammer plugin
   yum: name=rubygem-hammer_cli_foreman state=present
   retries: 3
   delay: 30
   register: aug_result
   until: aug_result.rc == 0
+
+- name: Change Foreman password to "octopus"
+  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} user update --login admin --password octopus
+
+- name: Set new Foreman password as fact
+  set_fact: foreman_admin_password="octopus"
 
 - name: Hammer global parameters
   command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} global-parameter set --name {{item.key}} --value {{item.value}}
