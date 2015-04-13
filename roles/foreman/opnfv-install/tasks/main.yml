@@ -131,9 +131,9 @@
     bash -x ./foreman_server.sh
   register: installer_run
   environment:
-    FOREMAN_GATEWAY: "true"
+    FOREMAN_GATEWAY: "{{ default_gw }}"
     FOREMAN_PROVISIONING: "true"
-    PROVISIONING_INTERFACE: "{{ hostvars['localhost'].ansible_default_ipv4.alias }}"
+    PROVISIONING_INTERFACE: "enp0s8"
   tags:
     - foreman_install
 
