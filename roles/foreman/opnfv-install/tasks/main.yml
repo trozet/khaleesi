@@ -195,3 +195,12 @@
     creates: /tmp/hostcreate.lock
   when: (bare_host_result is defined) and (bare_host_result.rc == 0)
 
+- name: Restart Foreman
+  service: name=foreman enabled=yes state=restarted
+
+- name: Restart Foreman-Proxy
+  service: name=foreman-proxy enabled=yes state=restarted
+
+- name: Restart httpd
+  service: name=httpd enabled=yes state=restarted
+
