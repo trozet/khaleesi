@@ -204,3 +204,10 @@
 - name: Restart httpd
   service: name=httpd enabled=yes state=restarted
 
+- name: Add Private Controller DHCP Entries
+  hosts: all
+  tasks:
+   - template: src=dhcp_hosts.j2 dest=/etc/dhcp/dhcpd.hosts owner=root group=root mode=0644
+
+- name: Restart dhcpd
+  service: name=dhcpd enabled=yes state=restarted

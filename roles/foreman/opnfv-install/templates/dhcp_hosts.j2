@@ -1,0 +1,10 @@
+##static hosts
+{% for node in nodes %}
+{% if nodes[node].type == "controller" %}
+host private_{{ nodes[node].short_name }} {
+   hardware ethernet {{ nodes[node].private_mac }};
+   fixed-address    {{ nodes[node].private_ip }};
+}
+{% endif %}
+{% endfor %}
+
