@@ -211,3 +211,12 @@
 
 - name: Restart dhcpd
   service: name=dhcpd enabled=yes state=restarted
+
+- name: Restart tftp socket
+  service: name=tftp.socket enabled=yes state=restarted
+
+- name: Restart tftp service
+  service: name=tftp.service enabled=yes state=restarted
+
+- name: Restart DNS service
+  service: name=named enabled=yes state=restarted
