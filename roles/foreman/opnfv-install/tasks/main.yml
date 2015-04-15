@@ -123,6 +123,15 @@
         dest=/usr/share/opnfv/modules/wait-for
         clone=yes
 
+- name: Clone Ceph module
+  git:  repo=https://github.com/stackforge/puppet-ceph.git
+        dest=/usr/share/opnfv/modules/ceph
+        clone=yes
+
+- name: Clone NTP module
+  command: /usr/bin/puppet module install puppetlabs-ntp
+  register: ntp_result
+  failed_when: (ntp_result.rc != 0)
 
 - name: Run the installer
   shell: >
@@ -205,9 +214,10 @@
   service: name=httpd enabled=yes state=restarted
 
 - name: Add Private Controller DHCP Entries
-  hosts: all
-  tasks:
-   - template: src=dhcp_hosts.j2 dest=/etc/dhcp/dhcpd.hosts owner=root group=root mode=0644
+  template: src=dhcp_hosts.j2 dest=/etc/dhcp/dhcpd.hosts owner=root group=root mode=0644
+
+- name: Add Listening Interfaces to DHCP config
+  template: src=dhcp_interfaces.j2 dest=/etc/sysconfig/dhcpd owner=root group=root mode=0644
 
 - name: Restart dhcpd
   service: name=dhcpd enabled=yes state=restarted
