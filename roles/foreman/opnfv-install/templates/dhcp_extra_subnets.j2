@@ -1,0 +1,40 @@
+#Extra subnets for dhcp
+{% set split_ip = facter_ipaddress_enp0s9.split('.') %}
+{% set lsv_min = split_ip[3]|int + 1 %}
+{% set lsv_max = split_ip[3]|int + 8 %}
+subnet {{ facter_network_enp0s9 }} netmask {{ facter_netmask_enp0s9 }} {
+  pool
+  {
+    range {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_min }} {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_max }};
+  }
+
+  option subnet-mask {{ facter_netmask_enp0s9 }};
+}
+
+{% set split_ip = facter_ipaddress_enp0s10.split('.') %}
+{% set lsv_min = split_ip[3]|int + 1 %}
+{% set lsv_max = split_ip[3]|int + 8 %}
+subnet {{ facter_network_enp0s10 }} netmask {{ facter_netmask_enp0s10 }} {
+  pool
+  {
+    range {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_min }} {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_max }};
+  }
+
+  option subnet-mask {{ facter_netmask_enp0s10 }};
+}
+
+{% if network_type == "multi_network" %}
+
+{% set split_ip = facter_ipaddress_enp0s16.split('.') %}
+{% set lsv_min = split_ip[3]|int + 1 %}
+{% set lsv_max = split_ip[3]|int + 8 %}
+subnet {{ facter_network_enp0s16 }} netmask {{ facter_netmask_enp0s16 }} {
+  pool
+  {
+    range {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_min }} {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_max }};
+  }
+
+  option subnet-mask {{ facter_netmask_enp0s16 }};
+}
+
+{% endif %}

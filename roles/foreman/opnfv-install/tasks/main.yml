@@ -216,17 +216,26 @@
 - name: Add Private Controller DHCP Entries
   template: src=dhcp_hosts.j2 dest=/etc/dhcp/dhcpd.hosts owner=root group=root mode=0644
 
-- name: Add Listening Interfaces to DHCP config
+- name: Add Listening Interfaces to DHCP sysconfig
   template: src=dhcp_interfaces.j2 dest=/etc/sysconfig/dhcpd owner=root group=root mode=0644
+
+- name: Add Include Directive to dhcpd.conf
+  lineinfile: >
+       dest=/etc/dhcp/dhcpd.conf
+       line='include "/etc/dhcp/dhcpd.extra";'
+       state=present
+
+- name: Add DHCP Subnet Config
+  template: src=dhcp_extra_subnets.j2 dest=/etc/dhcp/dhcpd.extra owner=root group=root mode=0644
 
 - name: Restart dhcpd
   service: name=dhcpd enabled=yes state=restarted
 
-- name: Restart tftp socket
-  service: name=tftp.socket enabled=yes state=restarted
+- name: Ensure tftp socket
+  service: name=tftp.socket enabled=yes state=started
 
-- name: Restart tftp service
-  service: name=tftp.service enabled=yes state=restarted
+- name: Ensure tftp service
+  service: name=tftp.service enabled=yes state=started
 
 - name: Restart DNS service
   service: name=named enabled=yes state=restarted
