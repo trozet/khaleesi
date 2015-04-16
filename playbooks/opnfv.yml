@@ -34,9 +34,16 @@
   sudo: yes
   roles:
     - { role: foreman/opnfv-install }
-#    - { role: foreman/hostgroup-params }
   tags:
     - install
 
-#- include: ../workarounds/workarounds-pre-run-foreman.yml tags=workaround
+- name: Deploy Nodes
+  hosts: local
+  sudo: no
+  gather_facts: False
+  roles:
+    - { role: get_nodes/foreman,
+              nodes_created: "{{ new_nodes.results }}" }
+  tags:
+    - provision
 
