@@ -202,7 +202,7 @@
 
 
 - name: Baremetal Host Create Lock
-  command: touch /tmp/hostcreate.lock
+  command: /usr/bin/touch /tmp/hostcreate.lock
   args:
     creates: /tmp/hostcreate.lock
   when: (bare_host_result is defined) and (bare_host_result.rc == 0)
