@@ -165,6 +165,9 @@
 - name: set foreman admin password as fact
   set_fact: foreman_admin_password={{foreman_parse_password.stdout }}
 
+- name: Set resolv.conf
+  template: src=resolv_conf.j2 dest=/etc/resolv.conf owner=root group=root mode=0644
+
 - name: Install hammer plugin
   yum: name=rubygem-hammer_cli_foreman state=present
   retries: 3
