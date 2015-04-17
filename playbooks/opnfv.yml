@@ -37,6 +37,11 @@
   tags:
     - install
 
+- name: Pause and wait 1 min for Foreman
+  hosts: localhosts
+  tasks:
+   - pause: minutes=1
+
 - name: Deploy Nodes
   hosts: local
   sudo: no
