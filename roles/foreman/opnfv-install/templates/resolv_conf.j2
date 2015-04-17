@@ -1,3 +1,3 @@
 search ci.com opnfv.com
-nameserver {{ facter_ipaddress_enp0s8 }}
+nameserver {{ ansible_enp0s8.ipv4.address }}
 nameserver 8.8.8.8
