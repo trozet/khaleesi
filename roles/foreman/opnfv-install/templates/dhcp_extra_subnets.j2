@@ -1,40 +1,40 @@
 #Extra subnets for dhcp
-{% set split_ip = facter_ipaddress_enp0s9.split('.') %}
+{% set split_ip = ansible_enp0s9.ipv4.address.split('.') %}
 {% set lsv_min = split_ip[3]|int + 1 %}
 {% set lsv_max = split_ip[3]|int + 8 %}
-subnet {{ facter_network_enp0s9 }} netmask {{ facter_netmask_enp0s9 }} {
+subnet {{ ansible_enp0s9.ipv4.network }} netmask {{ ansible_enp0s9.ipv4.netmask }} {
   pool
   {
     range {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_min }} {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_max }};
   }
 
-  option subnet-mask {{ facter_netmask_enp0s9 }};
+  option subnet-mask {{ ansible_enp0s9.ipv4.netmask }};
 }
 
-{% set split_ip = facter_ipaddress_enp0s10.split('.') %}
+{% set split_ip = ansible_enp0s10.ipv4.address.split('.') %}
 {% set lsv_min = split_ip[3]|int + 1 %}
 {% set lsv_max = split_ip[3]|int + 8 %}
-subnet {{ facter_network_enp0s10 }} netmask {{ facter_netmask_enp0s10 }} {
+subnet {{ ansible_enp0s10.ipv4.network }} netmask {{ ansible_enp0s10.ipv4.netmask }} {
   pool
   {
     range {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_min }} {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_max }};
   }
 
-  option subnet-mask {{ facter_netmask_enp0s10 }};
+  option subnet-mask {{ ansible_enp0s10.ipv4.netmask }};
 }
 
 {% if network_type == "multi_network" %}
 
-{% set split_ip = facter_ipaddress_enp0s16.split('.') %}
+{% set split_ip = ansible_enp0s16.ipv4.address.split('.') %}
 {% set lsv_min = split_ip[3]|int + 1 %}
 {% set lsv_max = split_ip[3]|int + 8 %}
-subnet {{ facter_network_enp0s16 }} netmask {{ facter_netmask_enp0s16 }} {
+subnet {{ ansible_enp0s16.ipv4.network }} netmask {{ ansible_enp0s16.ipv4.netmask }} {
   pool
   {
     range {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_min }} {{ split_ip[0] }}.{{ split_ip[1] }}.{{ split_ip[2] }}.{{ lsv_max }};
   }
 
-  option subnet-mask {{ facter_netmask_enp0s16 }};
+  option subnet-mask {{ ansible_enp0s16.ipv4.netmask }};
 }
 
 {% endif %}
