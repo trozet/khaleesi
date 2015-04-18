@@ -12,7 +12,7 @@ subnet {{ ansible_enp0s9.ipv4.network }} netmask {{ ansible_enp0s9.ipv4.netmask 
 }
 
 {% set split_ip = ansible_enp0s10.ipv4.address.split('.') %}
-{% set lsv_min = split_ip[3]|int + 1 %}
+{% set lsv_min = split_ip[3]|int + 4 %}
 {% set lsv_max = split_ip[3]|int + 8 %}
 subnet {{ ansible_enp0s10.ipv4.network }} netmask {{ ansible_enp0s10.ipv4.netmask }} {
   pool
