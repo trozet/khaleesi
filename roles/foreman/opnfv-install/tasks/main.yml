@@ -187,27 +187,6 @@
   failed_when: (param_result.rc != 0) and (param_result.rc != 65)
   with_dict: global_params
 
-- name: Create BareMetal Hosts in Foreman
-  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} host create --name {{item.value.short_name}} --hostgroup {{item.value.hostgroup}} 
-           --root-password {{item.value.ansible_ssh_pass}} --managed true --mac {{item.value.mac_address}} 
-           --interface type=Nic::BMC,ip={{item.value.bmc_ip}},mac={{item.value.bmc_mac}},username={{item.value.bmc_user}},password={{item.value.bmc_pass}},provider=IPMI 
-           --architecture x86_64 --medium "CentOS 7 mirror" --ptable "OpenStack Disk Layout"
-  when: ("{{item.value.host_type}}" == 'baremetal') or (hosts_created is defined)
-  with_dict: nodes
-  retries: 3
-  delay: 30
-  register: bare_host_result
-  until: bare_host_result.rc == 0
-  args:
-    creates: /tmp/hostcreate.lock
-
-
-- name: Baremetal Host Create Lock
-  command: /usr/bin/touch /tmp/hostcreate.lock
-  args:
-    creates: /tmp/hostcreate.lock
-  when: (bare_host_result is defined) and (bare_host_result.rc == 0)
-
 - name: Restart Foreman
   service: name=foreman enabled=yes state=restarted
 
@@ -243,3 +222,38 @@
 
 - name: Restart DNS service
   service: name=named enabled=yes state=restarted
+
+- name: Create BareMetal Hosts in Foreman
+  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} host create --name {{item.value.short_name}} --hostgroup {{item.value.hostgroup}}
+           --root-password {{item.value.ansible_ssh_pass}} --managed true --mac {{item.value.mac_address}}
+           --interface type=Nic::BMC,ip={{item.value.bmc_ip}},mac={{item.value.bmc_mac}},username={{item.value.bmc_user}},password={{item.value.bmc_pass}},provider=IPMI
+           --architecture x86_64 --medium "CentOS 7 mirror" --ptable "OpenStack Disk Layout"
+  when: ("{{item.value.host_type}}" == 'baremetal') or (hosts_created is defined)
+  with_dict: nodes
+  retries: 3
+  delay: 30
+  register: bare_host_result
+  until: bare_host_result.rc == 0
+  args:
+    creates: /tmp/hostcreate.lock
+
+
+- name: Baremetal Host Create Lock
+  command: /usr/bin/touch /tmp/hostcreate.lock
+  args:
+    creates: /tmp/hostcreate.lock
+  when: (bare_host_result is defined) and (bare_host_result.rc == 0)
+
+- name: Download vmlinuz
+  get_url: url=http://mirror.centos.org/centos/7/os/x86_64/images/pxeboot/vmlinuz
+           dest=/var/lib/tftpboot/boot/CentOS-7-x86_64-vmlinuz
+           mode=644
+           force=yes
+           timeout=60
+
+- name: Download initrd
+  get_url: url=http://mirror.centos.org/centos/7/os/x86_64/images/pxeboot/initrd.img
+           dest=/var/lib/tftpboot/boot/CentOS-7-x86_64-initrd.img
+           mode=644
+           force=yes
+           timeout=120
