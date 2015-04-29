@@ -56,6 +56,7 @@
   git: repo={{ astapor_repo }}
        dest={{ astapor_dest }}
        version={{ astapor_branch }}
+       force=yes
 
 - name: Set hostname
   hostname: name=foreman-server.opnfv.com
