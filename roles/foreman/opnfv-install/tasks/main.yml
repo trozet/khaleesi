@@ -169,6 +169,12 @@
 - name: Set resolv.conf
   template: src=resolv_conf.j2 dest=/etc/resolv.conf owner=root group=root mode=0644
 
+- name: Disable hiera in puppet
+  lineinfile: >
+    dest=/etc/puppet/puppet.conf
+    line='    data_binding_terminus = none'
+    state=present
+
 - name: Install hammer plugin
   yum: name=rubygem-hammer_cli_foreman state=present
   retries: 3
@@ -196,6 +202,9 @@
 
 - name: Restart httpd
   service: name=httpd enabled=yes state=restarted
+
+- name: Restart puppet
+  service: name=puppet enabled=yes state=restarted
 
 - name: Add Private Controller DHCP Entries
   template: src=dhcp_hosts.j2 dest=/etc/dhcp/dhcpd.hosts owner=root group=root mode=0644
