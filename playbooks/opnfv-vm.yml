@@ -1,0 +1,44 @@
+---
+#determine provisioner and whether or not to skip
+#- include: group_by_provision.yml
+
+#- include: provision.yml
+#- include: validate_nodes.yml
+#- include: group_by.yml tags=groupby
+
+#- include: prep.yml
+
+- name: Prepare for Foreman install
+  hosts: localhost
+  sudo: yes
+  roles:
+    - { role: foreman/common }
+  tags:
+    - prep
+
+#- name: Prepare foreman network
+#  hosts: foreman_installer:tempest
+#  sudo: yes
+#  roles:
+#    - { role: network-setup }
+#  tags:
+#    - prep
+#    - tempest_setup
+
+# apply pre-foreman workarouds
+- include: ../workarounds/workarounds-prep.yml tags=workaround
+
+- name: Install Foreman
+  hosts: localhost
+  gather_facts: True
+  sudo: yes
+  roles:
+    - { role: foreman/opnfv-install }
+  tags:
+    - install
+
+- name: Pause and wait 1 min for Foreman
+  hosts: localhosts
+  tasks:
+   - pause: minutes=1
+
