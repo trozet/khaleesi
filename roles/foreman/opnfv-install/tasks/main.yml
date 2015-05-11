@@ -182,11 +182,11 @@
   register: aug_result
   until: aug_result.rc == 0
 
-- name: Change Foreman password to "octopus"
-  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} user update --login admin --password octopus
+- name: Change Foreman password to one provided in ksgen settings
+  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} user update --login admin --password {{ provisioner.password }}
 
 - name: Set new Foreman password as fact
-  set_fact: foreman_admin_password="octopus"
+  set_fact: foreman_admin_password={{ provisioner.password }}
 
 - name: Hammer global parameters
   command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} global-parameter set --name {{item.key}} --value {{item.value}}
