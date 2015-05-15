@@ -18,11 +18,20 @@
   with_dict: nodes
 
 - name: Wait for puppet to complete
-  wait_for:
-         search_regex="^\s*failure\:\s*0$"
-         path=/var/lib/puppet/state/last_run_summary.yaml
-         state=present delay=1200 timeout=2400
-  with_dict: nodes
+     uri: >
+        "url={{ provisioner.foreman_url }}hosts/{{ item.value.hostname }}/status"
+        method=GET
+        user=admin
+        password={{ provisioner.password }}
+        force_basic_auth=yes
+        return_content=yes
+        HEADER_Content-Type="application/json"
+        HEADER_Accepts="application/json"
+     register: webresult
+     with_dict: nodes
+     until: webresult.content.find('Active') != -1
+     retries: 60
+     delay: 60
 
 - name: Print host openstack network type (nova/neutron)
   debug: var=provisioner.network.type
