@@ -3,7 +3,7 @@ openstack_foreman_installer_rpm: openstack-foreman-installer
 ruby_scl_url: http://dev.centos.org/centos/6/SCL/x86_64/
 astapor_dest: /usr/share/openstack-foreman-installer
 astapor_repo: https://github.com/trozet/astapor.git
-astapor_branch: opendaylight
+astapor_branch: v1.0
 opm_dest: /usr/share/openstack-puppet/modules
 controller_name: "{{ nodes.controller.name }}"
 controller_priv_ip: "{{ hostvars[controller_name].ansible_eth1.ipv4.address }}"

@@ -112,7 +112,7 @@
   git:  repo=https://github.com/trozet/puppet-trystack.git
         dest=/usr/share/opnfv/modules/trystack/
         clone=yes
-        version=quickstack
+        version=v1.0
 
 - name: Clone OpenDaylight module
   git:  repo=https://github.com/dfarrell07/puppet-opendaylight.git
