@@ -118,16 +118,19 @@
   git:  repo=https://github.com/dfarrell07/puppet-opendaylight.git
         dest=/usr/share/opnfv/modules/opendaylight/
         clone=yes
+        version=v1.0.0
 
 - name: Clone wait for module
   git:  repo=https://github.com/basti1302/puppet-wait-for.git
         dest=/usr/share/opnfv/modules/wait-for
         clone=yes
+        version=0.3.0
 
 - name: Clone Ceph module
   git:  repo=https://github.com/stackforge/puppet-ceph.git
         dest=/usr/share/opnfv/modules/ceph
         clone=yes
+        version=a1c1ce2aea987550e54bcb1f3e3a18f428a10506
 
 - name: Clone NTP module
   command: /usr/bin/puppet module install puppetlabs-ntp
