@@ -238,7 +238,21 @@
            --root-password {{item.value.ansible_ssh_pass}} --managed true --mac {{item.value.mac_address}}
            --interface type=Nic::BMC,ip={{item.value.bmc_ip}},mac={{item.value.bmc_mac}},username={{item.value.bmc_user}},password={{item.value.bmc_pass}},provider=IPMI
            --architecture x86_64 --medium "CentOS 7 mirror" --ptable "OpenStack Disk Layout"
-  when: ("{{item.value.host_type}}" == 'baremetal') or (hosts_created is defined)
+  when: (("{{item.value.host_type}}" == 'baremetal') or (hosts_created is defined)) && ((no_dhcp is not defined) || (not no_dhcp))
+  with_dict: nodes
+  retries: 3
+  delay: 30
+  register: bare_host_result
+  until: bare_host_result.rc == 0
+  args:
+    creates: /tmp/hostcreate.lock
+
+- name: Create BareMetal Static Hosts in Foreman
+  command: /usr/bin/hammer -u admin -p {{ foreman_admin_password }} host create --name {{item.value.short_name}} --hostgroup {{item.value.hostgroup}}
+           --root-password {{item.value.ansible_ssh_pass}} --managed true --mac {{item.value.mac_address}}
+           --interface type=Nic::BMC,ip={{item.value.bmc_ip}},mac={{item.value.bmc_mac}},username={{item.value.bmc_user}},password={{item.value.bmc_pass}},provider=IPMI
+           --architecture x86_64 --medium "CentOS 7 mirror" --ptable "OpenStack Disk Layout" --ip {{item.value.admin_ip}}
+  when: (("{{item.value.host_type}}" == 'baremetal') or (hosts_created is defined)) && no_dhcp
   with_dict: nodes
   retries: 3
   delay: 30
