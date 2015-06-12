@@ -133,6 +133,11 @@ def main():
     hosts_url = url + 'hosts/'
 
     headers = {'Content-Type': 'application/json', }
+    data=json.dumps({'device': 'pxe'})
+    r = s.put(url + 'hosts/%s/boot' % node, data=data, headers=headers)
+    if r.status_code != 200:
+        module.fail_json(msg=r.json()[0]['message'])
+
     data=json.dumps({'host': {'build': 'true'}})
     r = s.put(url + 'hosts/%s' % node, data=data, headers=headers)
 
