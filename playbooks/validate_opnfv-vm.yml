@@ -1,0 +1,21 @@
+---
+- name: Verify VMs are Configured
+  hosts: local
+  gather_facts: False
+  tasks:
+    - name: Wait for puppet to complete
+      uri: >
+        "url={{ provisioner.foreman_url }}hosts/{{ item.value.hostname }}/status"
+        method=GET
+        user=admin
+        password={{ provisioner.password }}
+        force_basic_auth=yes
+        return_content=yes
+        HEADER_Content-Type="application/json"
+        HEADER_Accepts="application/json"
+      register: webresult
+      with_dict: nodes
+      until: webresult.content.find('Active') != -1
+      retries: 60
+      delay: 60
+

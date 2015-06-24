@@ -38,7 +38,7 @@
     - install
 
 - name: Pause and wait 1 min for Foreman
-  hosts: localhosts
+  hosts: localhost
   tasks:
    - pause: minutes=1
 
