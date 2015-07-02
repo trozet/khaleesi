@@ -27,6 +27,7 @@
     return_content=yes
     HEADER_Content-Type="application/json"
     HEADER_Accepts="application/json"
+    validate_certs=no
   register: webresult
   with_dict: nodes
   until: webresult.content.find('Active') != -1
