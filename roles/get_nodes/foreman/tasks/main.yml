@@ -31,7 +31,7 @@
   register: webresult
   with_dict: nodes
   until: webresult.content.find('Active') != -1
-  retries: 90
+  retries: 60
   delay: 60
 
 - name: Print host openstack network type (nova/neutron)
