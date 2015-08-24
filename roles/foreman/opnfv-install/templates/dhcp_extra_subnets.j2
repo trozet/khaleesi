@@ -35,6 +35,7 @@ subnet {{ ansible_enp0s16.ipv4.network }} netmask {{ ansible_enp0s16.ipv4.netmas
   }
 
   option subnet-mask {{ ansible_enp0s16.ipv4.netmask }};
+  option routers {{ ansible_default_ipv4.gateway }};
 }
 
 {% endif %}
