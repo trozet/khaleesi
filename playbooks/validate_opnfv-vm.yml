@@ -3,20 +3,19 @@
   hosts: local
   gather_facts: False
   tasks:
-    - name: Wait for puppet to complete
-      uri: >
-        "url={{ provisioner.foreman_url }}hosts/{{ item.value.hostname }}/status"
-        method=GET
-        user=admin
-        password={{ provisioner.password }}
-        force_basic_auth=yes
-        return_content=yes
-        HEADER_Content-Type="application/json"
-        HEADER_Accepts="application/json"
-        validate_certs=no
-      register: webresult
+    - name: set fact with hostnames
+      set_fact: foo_item="{{ item.value.hostname }}"
       with_dict: nodes
-      until: webresult.content.find('Active') != -1
-      retries: 60
-      delay: 60
+      register: foo_result
 
+    - name: make a list
+      set_fact: nodes_list="{{ foo_result.results | map(attribute='ansible_facts.foo_item') | list }}"
+
+    - debug: var=nodes_list
+
+    - name: Wait for puppet to complete
+      foreman_validate:
+        foreman_url: "{{ provisioner.foreman_url }}"
+        foreman_username: "{{ provisioner.username }}"
+        foreman_password: "{{ provisioner.password }}"
+        node_list: "{{ nodes_list }}"
