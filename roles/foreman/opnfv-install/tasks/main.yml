@@ -109,7 +109,7 @@
   sudo: yes
 
 - name: Copy OPNFV modules
-  local_action: synchronize src=/vagrant/puppet-opnfv dest=/usr/share/opnfv/modules/opnfv/ recursive=yes
+  local_action: synchronize src=/vagrant/puppet-opnfv/ dest=/usr/share/opnfv/modules/opnfv/ recursive=yes
 
 - name: Clone OpenDaylight module
   git:  repo=https://github.com/dfarrell07/puppet-opendaylight.git
