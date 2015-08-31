@@ -108,11 +108,8 @@
         mode=0755
   sudo: yes
 
-- name: Clone OPNFV modules
-  git:  repo=https://github.com/trozet/puppet-trystack.git
-        dest=/usr/share/opnfv/modules/trystack/
-        clone=yes
-        version=quickstack
+- name: Copy OPNFV modules
+  local_action: synchronize src=/vagrant/puppet-opnfv dest=/usr/share/opnfv/modules/opnfv/ recursive=yes
 
 - name: Clone OpenDaylight module
   git:  repo=https://github.com/dfarrell07/puppet-opendaylight.git
