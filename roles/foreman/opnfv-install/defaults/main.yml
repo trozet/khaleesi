@@ -12,6 +12,7 @@ private_interface: eth1
 private_netmask: 255.255.255.0
 public_interface: eth0
 public_netmask: 255.255.255.0
+domain_name: opnfv.com
 seed_values:
     - { name: 'neutron', oldvalue: 'false', newvalue: 'true' }
     - { name: 'use_qemu_for_poc', oldvalue: 'false', newvalue: 'true' }
