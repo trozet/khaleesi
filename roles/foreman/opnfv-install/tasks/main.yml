@@ -59,10 +59,10 @@
        force=yes
 
 - name: Set hostname
-  hostname: name=foreman-server.opnfv.com
+  hostname: name=foreman-server.{{ domain_name }}
 
 - name: Make /etc/hosts proper
-  lineinfile: "dest=/etc/hosts regexp='.*foreman-server.*$' line='{{ hostvars['localhost'].ansible_default_ipv4.address }} foreman-server.opnfv.com foreman-server' state=present"
+  lineinfile: "dest=/etc/hosts regexp='.*foreman-server.*$' line='{{ hostvars['localhost'].ansible_default_ipv4.address }} foreman-server.{{ domain_name }} foreman-server' state=present"
 
 - name: Deactivate firewalld
   service: name=firewalld enabled=no state=stopped
