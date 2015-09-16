@@ -209,15 +209,18 @@
 
 - name: Add Listening Interfaces to DHCP sysconfig
   template: src=dhcp_interfaces.j2 dest=/etc/sysconfig/dhcpd owner=root group=root mode=0644
+  when: network_type != "single_network"
 
 - name: Add Include Directive to dhcpd.conf
   lineinfile: >
        dest=/etc/dhcp/dhcpd.conf
        line='include "/etc/dhcp/dhcpd.extra";'
        state=present
+  when: network_type != "single_network"
 
 - name: Add DHCP Subnet Config
   template: src=dhcp_extra_subnets.j2 dest=/etc/dhcp/dhcpd.extra owner=root group=root mode=0644
+  when: network_type != "single_network"
 
 - name: Restart dhcpd
   service: name=dhcpd enabled=yes state=restarted
