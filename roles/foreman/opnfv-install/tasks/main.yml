@@ -206,6 +206,7 @@
 
 - name: Add Private Controller DHCP Entries
   template: src=dhcp_hosts.j2 dest=/etc/dhcp/dhcpd.hosts owner=root group=root mode=0644
+  when: network_type != "single_network"
 
 - name: Add Listening Interfaces to DHCP sysconfig
   template: src=dhcp_interfaces.j2 dest=/etc/sysconfig/dhcpd owner=root group=root mode=0644
