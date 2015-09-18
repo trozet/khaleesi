@@ -115,7 +115,7 @@
   git:  repo=https://github.com/dfarrell07/puppet-opendaylight.git
         dest=/usr/share/opnfv/modules/opendaylight/
         clone=yes
-        version=1.0.0
+        version=1.1.0
 
 - name: Clone wait for module
   git:  repo=https://github.com/basti1302/puppet-wait-for.git
